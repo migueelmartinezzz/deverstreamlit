@@ -1,29 +1,39 @@
-import random
+import streamlit as st
 
-def adivinhacao():
-    st.write("Bem-vindo ao jogo de adivinhação!")
-    st.write("Pense em um número de 1 a 100 e eu vou tentar adivinhá-lo.")
-    
-    limite_inferior = 1
-    limite_superior = 100
-    tentativas = 0
-    
+def imprimir_tabuleiro(tabuleiro):
+    for linha in tabuleiro:
+        st.write(" | ".join(linha))
+        st.write("-" * 9)
+
+def verificar_vitoria(tabuleiro, jogador):
+    for i in range(3):
+        if all(tabuleiro[i][j] == jogador for j in range(3)) or all(tabuleiro[j][i] == jogador for j in range(3)):
+            return True
+    if all(tabuleiro[i][i] == jogador for i in range(3)) or all(tabuleiro[i][2-i] == jogador for i in range(3)):
+        return True
+    return False
+
+def jogo_da_velha():
+    tabuleiro = [[" " for _ in range(3)] for _ in range(3)]
+    jogador = "X"
+    st.write("Jogo da Velha")
     while True:
-        palpite = random.randint(limite_inferior, limite_superior)
-        st.write(f"Meu palpite é: {palpite}")
-        resposta = st.text_input("É maior, menor ou igual ao seu número? (maior/menor/igual): ").lower()
-        
-        if resposta == "maior":
-            limite_inferior = palpite + 1
-        elif resposta == "menor":
-            limite_superior = palpite - 1
-        elif resposta == "igual":
-            print(f"Eu sabia! Seu número é {palpite}.")
-            break
+        imprimir_tabuleiro(tabuleiro)
+        linha = st.number_input(f"Jogador {jogador}, escolha uma linha (0, 1 ou 2):", min_value=0, max_value=2, step=1)
+        coluna = st.number_input(f"Jogador {jogador}, escolha uma coluna (0, 1 ou 2):", min_value=0, max_value=2, step=1)
+        if tabuleiro[linha][coluna] == " ":
+            tabuleiro[linha][coluna] = jogador
+            if verificar_vitoria(tabuleiro, jogador):
+                imprimir_tabuleiro(tabuleiro)
+                st.write(f"Parabéns! Jogador {jogador} venceu!")
+                break
+            elif all(all(celula != " " for celula in linha) for linha in tabuleiro):
+                imprimir_tabuleiro(tabuleiro)
+                st.write("Empate!")
+                break
+            jogador = "O" if jogador == "X" else "X"
         else:
-            st.write("Por favor, responda 'maior', 'menor' ou 'igual'.")
-        
-        tentativas += 1
-    
-    st.write(f"Levei {tentativas} tentativas para adivinhar o seu número.")
-  
+            st.write("Essa posição já está ocupada. Escolha outra.")
+
+if __name__ == "__main__":
+    jogo_da_velha()
